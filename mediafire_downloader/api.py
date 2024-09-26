@@ -1,7 +1,6 @@
 import requests
+import pathlib
 from typing import Literal, Generator
-
-from .folder import Folder
 
 
 BASE_API_URL = "https://www.mediafire.com/api/1.4/"
@@ -22,7 +21,6 @@ def __get_folder_content(
 		"chunk": 1,
 	}
 
-	# TODO: Improve this by implementing a generator so we dont load all the files to memory
 	while True:
 		with requests.get(f"{BASE_API_URL}/folder/get_content.php", params=params) as response:
 			json = response.json()["response"]["folder_content"]
@@ -48,19 +46,23 @@ def get_folder_info(folder_key: str) -> dict:
 		return response.json()["response"]["folder_info"]
 
 
-def get_folder_content(folder_key: str) -> Folder:
+def get_folder_content(folder_key: str, path: pathlib.Path = pathlib.Path("")) -> list[dict]:
 	""" Get the folder content from the mediafire api """
 
-	folder_name = get_folder_info(folder_key)["name"]
-	root_folder = Folder(folder_name)
+	files: list[dict] = []
+	folder_name: str = get_folder_info(folder_key)["name"]
+	
+	new_path = pathlib.Path(path, folder_name).resolve()
 
 	for file in __get_folder_content(folder_key, "files"):
-		root_folder.add_file({
+		files.append({
 			"filename": file["filename"],
+			"path": new_path,
 			"download_link": file["links"]["normal_download"]
 		})
 
+	# NOTE: Might want to refactor this and get rid of recursion
 	for folder in __get_folder_content(folder_key, "folders"):
-		root_folder.add_folder(get_folder_content(folder["folderkey"]))
+		files.extend(get_folder_content(folder["folderkey"], new_path))
 
-	return root_folder
+	return files
