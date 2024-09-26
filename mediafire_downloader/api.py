@@ -1,12 +1,15 @@
 import requests
-from typing import Literal
+from typing import Literal, Generator
 
 from .folder import Folder
 
 
 BASE_API_URL = "https://www.mediafire.com/api/1.4/"
 
-def __get_folder_content(folder_key: str, content_type: Literal["files", "folders"]) -> dict:
+def __get_folder_content(
+		folder_key: str,
+		content_type: Literal["files", "folders"]
+	) -> Generator[dict, None, None]:
 	""" Retrieve the folder data from the mediafire api """
 
 	if content_type != "files" and content_type != "folders":
@@ -19,31 +22,18 @@ def __get_folder_content(folder_key: str, content_type: Literal["files", "folder
 		"chunk": 1,
 	}
 
-	result = []
-
 	# TODO: Improve this by implementing a generator so we dont load all the files to memory
 	while True:
 		with requests.get(f"{BASE_API_URL}/folder/get_content.php", params=params) as response:
 			json = response.json()["response"]["folder_content"]
-			result.extend(json[content_type])
+		
+		for item in json[content_type]:
+			yield item
 
 		if json["more_chunks"] == "no":
-			break
+			return
 
 		params["chunk"] += 1
-
-	return result
-
-def __clean_file_objects(files: list[dict]) -> list[dict]:
-	""" Remove the usesless information that comes with the file data """
-
-	return [
-		{
-			"filename": file["filename"],
-			"download_link": file["links"]["normal_download"]
-		} for file in files
-	]
-
 
 def get_folder_info(folder_key: str) -> dict:
 	""" Get the folder info from the mediafire api """
@@ -64,16 +54,13 @@ def get_folder_content(folder_key: str) -> Folder:
 	folder_name = get_folder_info(folder_key)["name"]
 	root_folder = Folder(folder_name)
 
-	files = __clean_file_objects(__get_folder_content(folder_key, "files"))
-	root_folder.add_files(files)
+	for file in __get_folder_content(folder_key, "files"):
+		root_folder.add_file({
+			"filename": file["filename"],
+			"download_link": file["links"]["normal_download"]
+		})
 
-	folders = __get_folder_content(folder_key, "folders")
-
-	folder_objects: list[Folder] = []
-	for folder in folders:
-		# TODO: Keep an eye on this in case we start hitting the recursion limit, might refactor this
-		folder_objects.append(get_folder_content(folder["folderkey"]))
-
-	root_folder.add_folders(folder_objects)
+	for folder in __get_folder_content(folder_key, "folders"):
+		root_folder.add_folder(get_folder_content(folder["folderkey"]))
 
 	return root_folder

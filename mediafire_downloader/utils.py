@@ -25,4 +25,4 @@ def get_folder_key(url: str) -> str:
 def download_file(path: str, file: dict) -> None:
 	""" Download files """
 
-
+	raise NotImplementedError("Implement this")

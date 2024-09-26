@@ -10,19 +10,19 @@ class Folder(object):
 		self.files = []
 		self.folders: list[Folder] = []
 
-	def add_files(self, files: list[dict]) -> None:
-		""" Add files to the folder """
+	def add_file(self, file: dict) -> None:
+		""" Add a file to the folder """
 
-		self.files.extend(files)
+		self.files.append(file)
 
-	def add_folders(self, folders: list["Folder"]) -> None:
-		""" Add inner folders to the folder """
+	def add_folder(self, folder: "Folder") -> None:
+		""" Add a child folder to the folder """
 
-		self.folders.extend(folders)
+		self.folders.append(folder)
 
 
 	def __str__(self) -> str:
-		return f"Folder ({self.name}): files: {self.files}, folders: {self.folders}"
+		return f"Folder '{self.name}': files({len(self.files)}), folders({len(self.folders)}): {self.folders}"
 	
 	def __repr__(self) -> str:
-		return f"Folder ({self.name}): files: {self.files}, folders: {self.folders}"
+		return f"Folder '{self.name}': files({len(self.files)}), folders({len(self.folders)}): {self.folders}"
