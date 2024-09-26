@@ -21,7 +21,7 @@ A Python-based tool that allows you to download entire folders from Mediafire **
 First, clone this repository:
 
 ```bash
-git clone https://github.com/your-username/mediafire-bulk-downloader.git
+git clone https://github.com/Sebastian-0110/mediafire-bulk-downloader.git
 
 cd mediafire-bulk-downloader
 ```
