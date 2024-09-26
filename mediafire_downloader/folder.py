@@ -22,7 +22,7 @@ class Folder(object):
 
 
 	def __str__(self) -> str:
-		return f"Folder ({self.name}): files: {self.files}, content: {self.folders}"
+		return f"Folder ({self.name}): files: {self.files}, folders: {self.folders}"
 	
 	def __repr__(self) -> str:
-		return f"Folder ({self.name}): files: {self.files}, content: {self.folders}"
+		return f"Folder ({self.name}): files: {self.files}, folders: {self.folders}"
