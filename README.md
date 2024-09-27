@@ -8,7 +8,7 @@ A Python-based tool that allows you to download entire folders from Mediafire **
 ## ✨ Features
 
 - 🗂️ **Download entire folders** from Mediafire, no premium account required.
-- ⚡ **Concurrent downloads** (pending) using multithreading for faster performance.
+- ⚡ **Concurrent downloads** using multithreading for faster performance.
 
 ## 🛠️ Requirements
 
